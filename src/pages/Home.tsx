@@ -1,7 +1,9 @@
+import PDFUpload from '../components/PDFUpload'
+
 function Home() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-start pt-16">
-      <header className="text-center">
+      <header className="text-center mb-12">
         <h1 className="text-4xl font-bold text-gray-800 mb-4">
           Generador de Preguntas
         </h1>
@@ -9,6 +11,10 @@ function Home() {
           Bienvenido al sistema de generación de preguntas
         </p>
       </header>
+
+      <main className="w-full px-4 flex justify-center">
+        <PDFUpload />
+      </main>
     </div>
   )
 }
