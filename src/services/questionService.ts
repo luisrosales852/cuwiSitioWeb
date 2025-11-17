@@ -5,8 +5,8 @@ import type { Chunk, QuestionFormData, GeneratedQuestionsResponse } from '../typ
  * Simulates API call with 2.5s delay
  */
 export async function generateQuestionsMock(
-  chunks: Chunk[],
-  formData: QuestionFormData
+  _chunks: Chunk[],
+  _formData: QuestionFormData
 ): Promise<GeneratedQuestionsResponse> {
   // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 2500))

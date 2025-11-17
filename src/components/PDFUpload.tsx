@@ -2,7 +2,7 @@ import { useState } from 'react'
 import Snackbar from './Snackbar'
 import ChunkCard from './ChunkCard'
 import QuestionForm from './QuestionForm'
-import QuestionDisplay from './QuestionDisplay'
+import QuizView from './QuizView'
 import type { Chunk, QuestionFormData, Question } from '../types'
 import chunksData from '../mock/chunks.json'
 import { generateQuestionsMock } from '../services/questionService'
@@ -26,6 +26,9 @@ function PDFUpload() {
   const [showForm, setShowForm] = useState(false)
   const [generatedQuestions, setGeneratedQuestions] = useState<Question[] | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [questionsGenerated, setQuestionsGenerated] = useState(false)
+  const [showQuizView, setShowQuizView] = useState(false)
+  const [currentFormData, setCurrentFormData] = useState<QuestionFormData | null>(null)
 
   const showNotification = (message: string, type: 'success' | 'info' | 'processing') => {
     setNotification({ message, type, isVisible: true })
@@ -87,7 +90,8 @@ function PDFUpload() {
     try {
       const response = await generateQuestionsMock(selectedChunks, data)
       setGeneratedQuestions(response.questions)
-      setShowForm(false)
+      setCurrentFormData(data)
+      setQuestionsGenerated(true)
       showNotification(
         `${response.questions.length} preguntas generadas exitosamente`,
         'success'
@@ -100,9 +104,12 @@ function PDFUpload() {
     }
   }
 
-  const handleReset = () => {
-    setGeneratedQuestions(null)
-    setShowForm(true)
+  const handleGoToQuiz = () => {
+    setShowQuizView(true)
+  }
+
+  const handleBackFromQuiz = () => {
+    setShowQuizView(false)
   }
 
   const selectedChunks = chunks.filter(chunk => selectedChunkIds.includes(chunk.id))
@@ -116,8 +123,8 @@ function PDFUpload() {
       />
 
       <div className="w-full max-w-4xl space-y-6">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Subir PDF</h2>
+        <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Subir PDF</h2>
 
           {/* File Upload Input */}
           <div className="mb-4">
@@ -125,9 +132,9 @@ function PDFUpload() {
               htmlFor="pdf-upload"
               className="block w-full cursor-pointer"
             >
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+              <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
                 <svg
-                  className="mx-auto h-12 w-12 text-gray-400"
+                  className="mx-auto h-16 w-16 text-gray-400"
                   stroke="currentColor"
                   fill="none"
                   viewBox="0 0 48 48"
@@ -140,10 +147,10 @@ function PDFUpload() {
                     strokeLinejoin="round"
                   />
                 </svg>
-                <p className="mt-2 text-sm text-gray-600">
-                  <span className="font-semibold text-blue-500">Haz clic para seleccionar</span> o arrastra un archivo
+                <p className="mt-3 text-base text-gray-600">
+                  <span className="font-bold text-blue-600">Haz clic para seleccionar</span> o arrastra un archivo
                 </p>
-                <p className="text-xs text-gray-500 mt-1">PDF (máx. 10MB)</p>
+                <p className="text-sm text-gray-500 mt-2">PDF (máx. 10MB)</p>
               </div>
             </label>
             <input
@@ -157,35 +164,37 @@ function PDFUpload() {
 
           {/* Selected File Display */}
           {selectedFile && (
-            <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="mb-4 p-5 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-2 border-green-200 shadow-sm">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <svg
-                    className="h-8 w-8 text-red-500"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                <div className="flex items-center space-x-4">
+                  <div className="bg-red-100 p-2 rounded-lg">
+                    <svg
+                      className="h-10 w-10 text-red-600"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-800 truncate max-w-[200px]">
+                    <p className="text-base font-semibold text-gray-800 truncate max-w-[300px]">
                       {selectedFile.name}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm text-gray-600 mt-0.5">
                       {(selectedFile.size / 1024).toFixed(2)} KB
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={handleRemove}
-                  className="text-gray-400 hover:text-red-500 transition-colors"
+                  className="text-gray-400 hover:text-red-600 hover:bg-red-100 p-2 rounded-lg transition-all duration-200"
                   aria-label="Remover archivo"
                 >
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fillRule="evenodd"
                       d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -201,39 +210,33 @@ function PDFUpload() {
           <button
             onClick={handleProcess}
             disabled={!selectedFile || isProcessing}
-            className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
+            className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all duration-200 shadow-md ${
               !selectedFile || isProcessing
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-blue-500 text-white hover:bg-blue-600'
+                : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 hover:shadow-lg transform hover:scale-[1.02]'
             }`}
           >
             {isProcessing ? 'Procesando...' : 'Procesar contenido'}
           </button>
         </div>
 
-        {/* Generated Questions Display */}
-        {generatedQuestions && (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="mb-6">
-              <QuestionDisplay questions={generatedQuestions} />
-            </div>
-            <button
-              onClick={handleReset}
-              className="w-full py-3 px-4 rounded-lg font-medium bg-gray-500 text-white hover:bg-gray-600 transition-colors"
-            >
-              Generar nuevas preguntas
-            </button>
-          </div>
+        {/* Quiz View */}
+        {showQuizView && generatedQuestions && currentFormData && (
+          <QuizView
+            questions={generatedQuestions}
+            formData={currentFormData}
+            onBack={handleBackFromQuiz}
+          />
         )}
 
-        {/* Chunks Display */}
-        {!generatedQuestions && showForm && chunks.length > 0 && (
+        {/* Chunks Display and Form */}
+        {!showQuizView && showForm && chunks.length > 0 && (
           <>
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
                 Fragmentos del PDF ({chunks.length})
               </h2>
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-gray-600 mb-6">
                 Selecciona los fragmentos que deseas incluir en la generación de preguntas
               </p>
               <div className="grid grid-cols-1 gap-3">
@@ -253,6 +256,8 @@ function PDFUpload() {
               selectedChunks={selectedChunks}
               onSubmit={handleFormSubmit}
               isGenerating={isGenerating}
+              onGoToQuiz={handleGoToQuiz}
+              questionsGenerated={questionsGenerated}
             />
           </>
         )}

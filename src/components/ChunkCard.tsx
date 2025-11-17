@@ -13,22 +13,34 @@ function ChunkCard({ chunk, isSelected, onToggle }: ChunkCardProps) {
   }
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
+    <div
+      className={`border-2 rounded-xl p-4 transition-all duration-200 cursor-pointer ${
+        isSelected
+          ? 'border-blue-500 bg-blue-50 shadow-md'
+          : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+      }`}
+      onClick={() => onToggle(chunk.id)}
+    >
       <div className="flex items-start gap-3">
         <input
           type="checkbox"
           checked={isSelected}
           onChange={() => onToggle(chunk.id)}
-          className="mt-1 h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
+          onClick={(e) => e.stopPropagation()}
+          className="mt-1 h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-2 focus:ring-blue-500 cursor-pointer"
         />
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-xs font-semibold text-gray-500 uppercase">
+            <span className={`text-xs font-semibold uppercase px-2 py-1 rounded-md ${
+              isSelected ? 'bg-blue-200 text-blue-800' : 'bg-gray-200 text-gray-600'
+            }`}>
               {chunk.type}
             </span>
-            <span className="text-xs text-gray-400">ID: {chunk.id}</span>
+            <span className="text-xs text-gray-500">ID: {chunk.id}</span>
           </div>
-          <p className="text-sm text-gray-700 leading-relaxed">
+          <p className={`text-sm leading-relaxed ${
+            isSelected ? 'text-gray-800' : 'text-gray-700'
+          }`}>
             {truncateText(chunk.text)}
           </p>
         </div>
