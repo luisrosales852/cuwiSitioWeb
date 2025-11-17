@@ -4,9 +4,10 @@ import type { QuestionFormData, Chunk } from '../types'
 interface QuestionFormProps {
   selectedChunks: Chunk[]
   onSubmit: (data: QuestionFormData) => void
+  isGenerating?: boolean
 }
 
-function QuestionForm({ selectedChunks, onSubmit }: QuestionFormProps) {
+function QuestionForm({ selectedChunks, onSubmit, isGenerating = false }: QuestionFormProps) {
   const [formData, setFormData] = useState<QuestionFormData>({
     educational_level: 'Middle School',
     context: '',
@@ -166,14 +167,14 @@ function QuestionForm({ selectedChunks, onSubmit }: QuestionFormProps) {
       {/* Submit Button */}
       <button
         type="submit"
-        disabled={selectedChunks.length === 0 || formData.question_type.length === 0}
+        disabled={selectedChunks.length === 0 || formData.question_type.length === 0 || isGenerating}
         className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
-          selectedChunks.length === 0 || formData.question_type.length === 0
+          selectedChunks.length === 0 || formData.question_type.length === 0 || isGenerating
             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
             : 'bg-blue-500 text-white hover:bg-blue-600'
         }`}
       >
-        Generar Preguntas
+        {isGenerating ? 'Generando preguntas...' : 'Generar Preguntas'}
       </button>
     </form>
   )

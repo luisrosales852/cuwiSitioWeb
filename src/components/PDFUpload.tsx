@@ -2,8 +2,10 @@ import { useState } from 'react'
 import Snackbar from './Snackbar'
 import ChunkCard from './ChunkCard'
 import QuestionForm from './QuestionForm'
-import type { Chunk, QuestionFormData } from '../types'
+import QuestionDisplay from './QuestionDisplay'
+import type { Chunk, QuestionFormData, Question } from '../types'
 import chunksData from '../mock/chunks.json'
+import { generateQuestionsMock } from '../services/questionService'
 
 interface Notification {
   message: string
@@ -22,6 +24,8 @@ function PDFUpload() {
   const [chunks, setChunks] = useState<Chunk[]>([])
   const [selectedChunkIds, setSelectedChunkIds] = useState<string[]>([])
   const [showForm, setShowForm] = useState(false)
+  const [generatedQuestions, setGeneratedQuestions] = useState<Question[] | null>(null)
+  const [isGenerating, setIsGenerating] = useState(false)
 
   const showNotification = (message: string, type: 'success' | 'info' | 'processing') => {
     setNotification({ message, type, isVisible: true })
@@ -76,12 +80,29 @@ function PDFUpload() {
     )
   }
 
-  const handleFormSubmit = (data: QuestionFormData) => {
-    showNotification(
-      `Formulario enviado: ${data.number_of_questions} preguntas, ${data.question_type.join(' y ')}, ${data.selectedChunks.length} chunks`,
-      'success'
-    )
-    console.log('Form Data:', data)
+  const handleFormSubmit = async (data: QuestionFormData) => {
+    setIsGenerating(true)
+    showNotification('Generando preguntas...', 'processing')
+
+    try {
+      const response = await generateQuestionsMock(selectedChunks, data)
+      setGeneratedQuestions(response.questions)
+      setShowForm(false)
+      showNotification(
+        `${response.questions.length} preguntas generadas exitosamente`,
+        'success'
+      )
+    } catch (error) {
+      showNotification('Error al generar preguntas', 'info')
+      console.error('Error generating questions:', error)
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  const handleReset = () => {
+    setGeneratedQuestions(null)
+    setShowForm(true)
   }
 
   const selectedChunks = chunks.filter(chunk => selectedChunkIds.includes(chunk.id))
@@ -190,8 +211,23 @@ function PDFUpload() {
           </button>
         </div>
 
+        {/* Generated Questions Display */}
+        {generatedQuestions && (
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="mb-6">
+              <QuestionDisplay questions={generatedQuestions} />
+            </div>
+            <button
+              onClick={handleReset}
+              className="w-full py-3 px-4 rounded-lg font-medium bg-gray-500 text-white hover:bg-gray-600 transition-colors"
+            >
+              Generar nuevas preguntas
+            </button>
+          </div>
+        )}
+
         {/* Chunks Display */}
-        {showForm && chunks.length > 0 && (
+        {!generatedQuestions && showForm && chunks.length > 0 && (
           <>
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">
@@ -216,6 +252,7 @@ function PDFUpload() {
             <QuestionForm
               selectedChunks={selectedChunks}
               onSubmit={handleFormSubmit}
+              isGenerating={isGenerating}
             />
           </>
         )}

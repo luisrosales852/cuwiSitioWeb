@@ -13,3 +13,28 @@ export interface QuestionFormData {
   question_type: string[]
   selectedChunks: string[]
 }
+
+export interface QuestionOption {
+  id: number
+  description: string
+  explanation?: string
+}
+
+export interface QuestionConfiguration {
+  open: boolean
+  numerical: boolean
+  true_false?: boolean
+  error_range?: number
+  case_sensitive: boolean
+}
+
+export interface Question {
+  question: string
+  options: QuestionOption[]
+  answer: number
+  configuration: QuestionConfiguration
+}
+
+export interface GeneratedQuestionsResponse {
+  questions: Question[]
+}
