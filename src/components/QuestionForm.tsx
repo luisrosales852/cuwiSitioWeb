@@ -185,7 +185,6 @@ function QuestionForm({
         >
           {isGenerating ? 'Generando preguntas...' : 'Generar Preguntas'}
         </button>
-
         <button
           type="button"
           onClick={onGoToQuiz}
@@ -196,7 +195,7 @@ function QuestionForm({
               : 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-60'
           }`}
         >
-          {questionsGenerated ? '✓ Pasar a Quiz →' : 'Pasar a Quiz'}
+          {questionsGenerated ? 'Pasar a Quiz →' : 'Pasar a Quiz'}
         </button>
       </div>
     </form>
